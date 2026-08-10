@@ -290,6 +290,26 @@ body {
 }
 .btn-download:hover { background: rgba(16,185,129,0.25); transform: translateY(-1px); }
 
+.result-btn-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.7rem;
+}
+
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 20px;
+  background: rgba(99,102,241,0.15);
+  color: var(--indigo-light);
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: var(--radius-sm);
+  font-family: inherit; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-copy:hover { background: rgba(99,102,241,0.25); transform: translateY(-1px); }
+.btn-copy.copied { background: rgba(16,185,129,0.2); color: var(--green-light); border-color: rgba(16,185,129,0.35); }
+.btn-copy.sm { padding: 5px 12px; font-size: 0.75rem; gap: 6px; }
+
 /* =========================================================
    TWO COL UPLOAD
    ========================================================= */
@@ -406,6 +426,21 @@ body {
 .data-table tbody td.dup-count { font-weight: 700; color: var(--orange-light); }
 .data-table tbody tr:last-child { border-bottom: none; }
 
+/* Kolom "No Struk" tetap terlihat (tidak ikut ter-scroll ke samping) */
+.data-table.freeze-nostruk th:nth-child(2),
+.data-table.freeze-nostruk td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  background: #14172a;
+  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.45);
+}
+.data-table.freeze-nostruk thead th:nth-child(2) {
+  z-index: 3;
+  background: #1a1d30;
+}
+.data-table.freeze-nostruk tbody td:nth-child(2) { z-index: 1; }
+.data-table.freeze-nostruk tbody tr:hover td:nth-child(2) { background: #1c2038; }
+
 /* Alert box */
 .alert-box {
   display: flex; align-items: center; gap: 12px;
@@ -469,13 +504,18 @@ body {
 
 /* Compare sections */
 .compare-section { margin-bottom: 1.2rem; }
+.compare-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
 .compare-file-tag {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 99px;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0;
 }
 .compare-file-tag.a { background: rgba(16,185,129,0.15); color: var(--green-light); border: 1px solid rgba(16,185,129,0.25); }
 .compare-file-tag.b { background: rgba(168,85,247,0.15); color: var(--purple-light); border: 1px solid rgba(168,85,247,0.25); }
