@@ -583,6 +583,50 @@ function downloadCSV(detail, filename) {
 }
 
 // ============================================================
+// SALIN (COPY) NO STRUK KE CLIPBOARD
+// ============================================================
+// Aman disisipkan ke dalam atribut onclick berkutip-tunggal
+function jsonForAttr(obj) {
+  return JSON.stringify(obj).replace(/'/g, '&#39;');
+}
+
+function salinNoStruk(daftar, btnEl) {
+  if (!daftar || !daftar.length) return;
+  const teks = daftar.join('\n');
+
+  const tandaiSukses = () => {
+    if (!btnEl) return;
+    const originalHTML = btnEl.dataset.originalHtml || btnEl.innerHTML;
+    btnEl.dataset.originalHtml = originalHTML;
+    btnEl.classList.add('copied');
+    btnEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Tersalin!`;
+    clearTimeout(btnEl._copyTimeout);
+    btnEl._copyTimeout = setTimeout(() => {
+      btnEl.innerHTML = originalHTML;
+      btnEl.classList.remove('copied');
+    }, 1800);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(teks).then(tandaiSukses).catch(() => salinFallback(teks, tandaiSukses));
+  } else {
+    salinFallback(teks, tandaiSukses);
+  }
+}
+
+function salinFallback(teks, onDone) {
+  const ta = document.createElement('textarea');
+  ta.value = teks;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); onDone && onDone(); } catch {}
+  document.body.removeChild(ta);
+}
+
+// ============================================================
 // HANDLER: HITUNG TRANSAKSI
 // ============================================================
 function handleFileHitung(file) {
@@ -704,13 +748,19 @@ function renderHasilDuplikat(daftar, duplikat, baseName) {
     </div>`;
   } else {
     listHTML = `
-      <button class="btn-download mb-4" onclick='downloadCSV(${JSON.stringify(duplikat)}, "${escapeHtml(csvFilename)}")'>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Unduh CSV Duplikat
-      </button>
+      <div class="result-btn-row mb-4">
+        <button class="btn-download" onclick='downloadCSV(${JSON.stringify(duplikat)}, "${escapeHtml(csvFilename)}")'>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Unduh CSV Duplikat
+        </button>
+        <button class="btn-copy sm" onclick='salinNoStruk(${jsonForAttr(duplikat.map(d => d.no_struk))}, this)'>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Salin No Struk
+        </button>
+      </div>
       <div class="table-scroll-wrap">
         <div class="table-wrap">
-          <table class="data-table">
+          <table class="data-table freeze-nostruk">
             <thead><tr><th>#</th><th>No Struk</th><th>Jumlah Muncul</th></tr></thead>
             <tbody>
               ${duplikat.map((d, i) => `<tr>
@@ -802,9 +852,15 @@ function jalankanBandingkan() {
   } else {
     const renderSection = (list, tag, cls) => list.length === 0 ? '' : `
       <div class="compare-section">
-        <div class="compare-file-tag ${cls}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-          Hanya di ${escapeHtml(tag)} (${formatNumber(list.length)})
+        <div class="compare-section-header">
+          <div class="compare-file-tag ${cls}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+            Hanya di ${escapeHtml(tag)} (${formatNumber(list.length)})
+          </div>
+          <button class="btn-copy sm" onclick='salinNoStruk(${jsonForAttr(list)}, this)'>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Salin No Struk
+          </button>
         </div>
         <div class="table-scroll-wrap">
           <div class="table-wrap">
